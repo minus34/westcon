@@ -55,6 +55,8 @@ CREATE TABLE westcon.sa3_2011_sydney_bts
   sa3_name character varying(50) NOT NULL,
   o_motorists integer NOT NULL,
   d_motorists integer NOT NULL,
+  centroid_x numeric(6,3) NOT NULL,
+  centroid_y numeric(5,3) NOT NULL,
   geom geometry(MultiPolygon,4326, 2) NOT NULL,
   CONSTRAINT sa3_2011_sydney_bts_pkey PRIMARY KEY (sa3_code)
 )
@@ -63,11 +65,13 @@ ALTER TABLE westcon.sa3_2011_sydney_bts OWNER TO postgres;
 
 CREATE INDEX sidx_sa3_2011_sydney_bts_geom ON westcon.sa3_2011_sydney_bts USING gist (geom);
 
-INSERT INTO westcon.sa3_2011_sydney_bts(sa3_code, sa3_name, o_motorists, d_motorists, geom) -- 3514
+INSERT INTO westcon.sa3_2011_sydney_bts -- 3514
 SELECT sa3_code::integer,
        sa3_name,
        0,
        0,
+       ST_X(ST_Centroid(ST_Transform(ST_Buffer(geom, 0.0), 4326))),
+       ST_Y(ST_Centroid(ST_Transform(ST_Buffer(geom, 0.0), 4326))),
        ST_Transform(ST_Multi(ST_Buffer(geom, 0.0)), 4326)
   FROM westcon.sa3_2011_sydney;
 
@@ -105,9 +109,8 @@ UPDATE westcon.sa3_2011_sydney_bts AS sa3
   WHERE jtw.d_sa3_11 = sa3.sa3_code;
 
 
-SELECT * FROM westcon.sa3_2011_sydney_bts; -- 41
-SELECT SUM(o_motorists), SUM(d_motorists) FROM westcon.sa3_2011_sydney_bts; -- 1,102,028; 1,099,290
-
+-- SELECT * FROM westcon.sa3_2011_sydney_bts; -- 41
+-- SELECT SUM(o_motorists), SUM(d_motorists) FROM westcon.sa3_2011_sydney_bts; -- 1,102,028; 1,099,290
 
 --Create table of motorist counts for each combination of origin and destination SA3 -- 6966
 DROP TABLE IF EXISTS westcon.sa3_2011_sydney_motorists;
@@ -152,5 +155,8 @@ DELETE FROM westcon.sa3_2011_sydney_motorists
   WHERE o_x IS NULL OR d_x IS NULL;
 
 
-COPY westcon.sa3_2011_sydney_motorists TO 'C:\\minus34\\GitHub\\WestCON\\sa3_2011_sydney_motorists.csv' CSV
+--COPY westcon.sa3_2011_sydney_motorists TO 'C:\\minus34\\GitHub\\WestCON\\sa3_2011_sydney_motorists.csv' CSV;
+
+--select * from westcon.sa3_2011_sydney_motorists where d_sa3_code = 11501 order by o_sa3_code;
+
 
