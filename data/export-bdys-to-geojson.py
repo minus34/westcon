@@ -22,7 +22,8 @@ except:
 cur = conn.cursor()
 
 # The query
-sql = "SELECT sa3_code, sa3_name, o_motorists, d_motorists, ST_AsGeoJSON(ST_SnapToGrid(geom, %s), %s, 0) FROM %s.%s"
+sql = "SELECT *, ST_AsGeoJSON(ST_SnapToGrid(geom, %s), %s, 0) AS geojson FROM %s.%s"
+# sql = "SELECT sa3_code, sa3_name, o_motorists, d_motorists, ST_AsGeoJSON(ST_SnapToGrid(geom, %s), %s, 0) FROM %s.%s"
 # "WHERE ST_Intersects(ST_SetSRID(ST_MakeBox2D(ST_Point(%s, %s), ST_Point(%s, %s)), 4283),geom)"
 
 try:
@@ -30,6 +31,9 @@ try:
 except psycopg2.Error:
     print "I can't SELECT"
     print sql
+
+# Get column names
+col_names = [desc[0] for desc in cur.description]
 
 # Create the GeoJSON output with an array of dictionaries containing the field names and values
 rows = cur.fetchall()
@@ -40,17 +44,21 @@ for row in rows:
     rec['type'] = 'Feature'
 
     props = collections.OrderedDict()
-    props['id'] = row[0]
-    props['name'] = row[1]
-    props['o'] = row[2]
-    props['d'] = row[3]
+    props['id'] = row[3]
+    props['name'] = row[4]
+
+    num_cols = len(col_names) - 1
+
+    # Loop through remaining columns of non-geo data and add to dictionary
+    for i in range(5, num_cols):
+        props[col_names[i]] = row[i]
 
     rec['properties'] = json.dumps(props)
-    rec['geometry'] = row[4]
+    rec['geometry'] = row[num_cols]  # the GeoJSON, aka the last column
 
     dicts.append(rec)
 
-gj = json.dumps(dicts).replace(" ", "").replace("\\", "").replace('"{', '{').replace('}"', '}')
+gj = json.dumps(dicts).replace("\\", "").replace('"{', '{').replace('}"', '}')
 
 # Output
 print ''.join(['{"type":"FeatureCollection","features":', gj, '}'])

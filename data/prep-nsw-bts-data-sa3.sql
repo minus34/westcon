@@ -51,13 +51,13 @@
 DROP TABLE IF EXISTS westcon.sa3_2011_sydney_bts;
 CREATE TABLE westcon.sa3_2011_sydney_bts
 (
+  centroid_x numeric(6,3) NOT NULL,
+  centroid_y numeric(5,3) NOT NULL,
+  geom geometry(MultiPolygon,4326, 2) NOT NULL,
   sa3_code integer NOT NULL,
   sa3_name character varying(50) NOT NULL,
   o_motorists integer NOT NULL,
   d_motorists integer NOT NULL,
-  centroid_x numeric(6,3) NOT NULL,
-  centroid_y numeric(5,3) NOT NULL,
-  geom geometry(MultiPolygon,4326, 2) NOT NULL,
   CONSTRAINT sa3_2011_sydney_bts_pkey PRIMARY KEY (sa3_code)
 )
 WITH (OIDS=FALSE);
@@ -66,13 +66,13 @@ ALTER TABLE westcon.sa3_2011_sydney_bts OWNER TO postgres;
 CREATE INDEX sidx_sa3_2011_sydney_bts_geom ON westcon.sa3_2011_sydney_bts USING gist (geom);
 
 INSERT INTO westcon.sa3_2011_sydney_bts -- 3514
-SELECT sa3_code::integer,
+SELECT ST_X(ST_Centroid(ST_Transform(ST_Buffer(geom, 0.0), 4326))),
+       ST_Y(ST_Centroid(ST_Transform(ST_Buffer(geom, 0.0), 4326))),
+       ST_Transform(ST_Multi(ST_Buffer(geom, 0.0)), 4326),
+       sa3_code::integer,
        sa3_name,
        0,
-       0,
-       ST_X(ST_Centroid(ST_Transform(ST_Buffer(geom, 0.0), 4326))),
-       ST_Y(ST_Centroid(ST_Transform(ST_Buffer(geom, 0.0), 4326))),
-       ST_Transform(ST_Multi(ST_Buffer(geom, 0.0)), 4326)
+       0
   FROM westcon.sa3_2011_sydney;
 
 CLUSTER westcon.sa3_2011_sydney_bts USING sidx_sa3_2011_sydney_bts_geom;
