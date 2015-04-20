@@ -87,7 +87,8 @@ UPDATE westcon.sa3_2011_sydney_bts AS sa3
            SUM(employed_persons)::integer AS motorists
     FROM westcon.jtw_table2011eh07
     WHERE mode10 IN (4, 5)
-    AND o_sa3_11 IS NOT NULL AND d_sa3_11 IS NOT NULL
+    --AND o_sa3_11 IS NOT NULL AND d_sa3_11 IS NOT NULL
+    AND d_sa3_11 IN (SELECT sa3_code FROM westcon.sa3_2011_sydney_bts)
     --AND o_study_area_name11 =  'GMA' AND d_study_area_name11 =  'GMA'
     GROUP BY o_sa3_11
   ) AS jtw
@@ -102,7 +103,8 @@ UPDATE westcon.sa3_2011_sydney_bts AS sa3
            SUM(employed_persons)::integer AS motorists
     FROM westcon.jtw_table2011eh07
     WHERE mode10 IN (4, 5)
-    AND o_sa3_11 IS NOT NULL AND d_sa3_11 IS NOT NULL
+    --AND o_sa3_11 IS NOT NULL AND d_sa3_11 IS NOT NULL
+    AND o_sa3_11 IN (SELECT sa3_code FROM westcon.sa3_2011_sydney_bts)
     --AND o_study_area_name11 =  'GMA' AND d_study_area_name11 =  'GMA'
     GROUP BY d_sa3_11
   ) AS jtw
