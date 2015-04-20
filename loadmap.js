@@ -11,6 +11,7 @@ var currId = 11703;
 var currName = "Sydney Inner City";
 var currValue = 107768;
 
+
 var themeGrades = [0, 250, 500, 1000, 2000, 4000, 8000];
 
 
@@ -18,7 +19,7 @@ function init() {
   //Initialize the map on the "map" div
   map = new L.Map('map');
   
-  //Control that shows state info on hover
+  //Control that shows info on the selected trip destination
   info = L.control();
 
   info.onAdd = function (map) {
@@ -28,11 +29,28 @@ function init() {
   };
 
   info.update = function (props) {
-    this._div.innerHTML = (props ? '<b>' + parseInt(props.d_motorists).toLocaleString() + ' </b> motorists drive to <b>' + props.name + '</b> for work<br/>'
-      : 'Select an area of Sydney');
+    this._div.innerHTML = (props ? '<b>' + parseInt(props.d_motorists).toLocaleString() + ' </b> motorists drive to <b>' + props.name + '</b> for work'
+      : 'Click/tap on an area of Sydney');
   };
 
   info.addTo(map);
+
+  //Control that shows info on the trip origin
+  info2 = L.control();
+
+  info2.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'info');
+    this.update();
+    return this._div;
+  };
+
+  info2.update = function (name, stat) {
+    this._div.innerHTML = (name ? '<b>' + stat.toLocaleString() + ' </b> drive from <b>' + name + '</b>'
+      : '');
+  };
+
+  info2.addTo(map);
+
   
   //Create a legend control
   legend = L.control({ position: 'bottomright' });
@@ -237,32 +255,16 @@ function onEachFeature(feature, layer) {
 }
 
 
-//Change map theme when user clicks on electorate
+//Change map theme when user clicks on destination
 function changeTheme(e) {
   var layer = e.target;
 
   currStat = "o_" + layer.feature.properties.id;
   currName = layer.feature.properties.name;
-  currValue = parseInt(layer.feature.properties.d);
+  currValue = parseInt(layer.feature.properties.d_motorists);
   
   //Display the boundaries
   loadGeoJson(json);
-
-  // //Update the legend
-  // labels = []
-
-  // for (var i = 0; i < themeGrades.length; i++) {
-      // from = themeGrades[i];
-      // to = themeGrades[i + 1];
-
-      // labels.push(
-          // '<i style="background:' + getColor(from + 1) + '"></i> ' +
-          // from + (to ? '&ndash;' + to : '+'));
-  // }
-
-  // var data = labels.join('<br/>');
-  
-  // $("#mapLegend").hide().html(data).fadeIn('fast');
 
   info.update(layer.feature.properties);
 };
@@ -285,10 +287,13 @@ function changeTheme(e) {
 
 // }
 
+
 function highlightFeature(e) {
     var layer = e.target;
 
     highlightStat = "o_" + layer.feature.properties.id;
+    var stat = currTarget.target.feature.properties[highlightStat];
+    var name = layer.feature.properties.name;
     
     if (currStat != highlightStat) {
       layer.setStyle({
@@ -302,11 +307,11 @@ function highlightFeature(e) {
       }
     }
     
-  info.update(layer.feature.properties);
+  info2.update(name, stat);
 }
 
 
 function resetHighlight(e) {
   geojsonLayer.resetStyle(e.target);
-  info.update();
+  info2.update();
 }
