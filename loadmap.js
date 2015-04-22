@@ -2,7 +2,7 @@
 var info;
 var info2;
 var legend;
-//var json;
+var json;
 var geojsonLayer;
 var startZoom = 10;
 var currTarget;
@@ -106,7 +106,7 @@ function init() {
   map.attributionControl.addAttribution('<br/>Data © <a href="http://www.bts.nsw.gov.au/">NSW Bureau of Transport Statistics</a>, <a href="http://www.abs.gov.au/">Australian Bureau Statistics</a>');
 
   //Load the boundaries
-  var json = (function () {
+  json = (function () {
     var json = null;
     $.ajax({
         'async': false,
@@ -120,43 +120,50 @@ function init() {
     return json;
   })();
   
-  //Display the boundaries
-  geojsonLayer = L.geoJson(json, {
-    //style: style,
-    style: {
-      weight: 1,
-      opacity: 0.0,
-      color: '#0000ff',
-      fillOpacity: 0.3,
-      fillColor: '#0000ff'
-    },
-    onEachFeature: onEachFeature
-  }).addTo(map);
-  
-  //loadGeoJson(json);
+  //Display the bdys
+  loadGeoJson(json);
 }
 
-// function loadGeoJson(json) {
-  // if (json != null) {
-    // try {
-      // geojsonLayer.clearLayers();
-    // }
-    // catch (err) {
-        // //dummy
-    // }
-
-    // geojsonLayer = L.geoJson(json, {
-      // style: style,
-      // onEachFeature: onEachFeature
-    // }).addTo(map);
-  // }
-// }
+function loadGeoJson(json) {
+  if (json != null) {
+    try {
+      geojsonLayer.clearLayers();
+    }
+    catch (err) {
+        //dummy
+    }
+    
+    if (currId) {
+      geojsonLayer = L.geoJson(json, {
+        style: style,
+        onEachFeature: onEachFeature
+      }).addTo(map);
+      
+      currTarget = geojsonLayer.getLayer(currId);
+      
+      console.log(currTarget);
+      
+    } else {
+      geojsonLayer = L.geoJson(json, {
+        //style: style,
+        style: {
+          weight: 1,
+          opacity: 0.0,
+          color: '#0000ff',
+          fillOpacity: 0.3,
+          fillColor: '#0000ff'
+        },
+        onEachFeature: onEachFeature
+      }).addTo(map);
+    }
+  }
+}
 
 //Sets style on each GeoJSON object
 function style(feature) {
   
   colVal = parseFloat(feature.properties["o_" + currId]);
-
+  
   return {
     weight: 1,
     opacity: 0.8,
@@ -247,10 +254,15 @@ function selectedFeature(e) {
   });
 
   currId = layer.feature.properties.id;
-
-  for (lyr of geojsonLayer.getLayers()) {
-    lyr.setStyle(style);  
-  }
+  currTarget = undefined; //need to reset this as it doesn't exist after bdys are reloaded
+    
+  //Refresh the boundaries with the new colours
+  loadGeoJson(json);
+  
+  // //Doesn't work
+  // for (lyr of geojsonLayer.getLayers()) {
+    // lyr.setStyle(style);  
+  // }
     
   if (!L.Browser.ie && !L.Browser.opera) {
       layer.bringToFront();
