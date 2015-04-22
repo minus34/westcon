@@ -1,19 +1,18 @@
 ﻿var map;
 var info;
+var info2;
 var legend;
-var json;
+//var json;
 var geojsonLayer;
-var currTarget;
 var startZoom = 10;
+var currTarget;
+var currId;
 
-var currStat = "o_11703";
-var currId = 11703;
-var currName = "Sydney Inner City";
-var currValue = 107768;
-
+//var currId = 11703;
+//var currName = "Sydney Inner City";
+//var currValue = 107768;
 
 var themeGrades = [0, 250, 500, 1000, 2000, 4000, 8000];
-
 
 function init() {
   //Initialize the map on the "map" div
@@ -50,7 +49,6 @@ function init() {
   };
 
   info2.addTo(map);
-
   
   //Create a legend control
   legend = L.control({ position: 'bottomright' });
@@ -76,17 +74,6 @@ function init() {
   };
   
   legend.addTo(map);
-
-  // // add MapBox tiles
-  // var tiles = L.tileLayer('http://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
-    // attribution: '<a href="https://www.mapbox.com/about/maps/">MapBox Terms &amp; Feedback</a>',
-    // id: 'examples.map-20v6611k'
-  // }).addTo(map);
-  
-  //Add tiles
-  // var tiles = L.tileLayer('http://a.tile.stamen.com/toner/{z}/{x}/{y}.png', { 
-    // attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data: &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors,<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'
-  // }).addTo(map);
   
   var tiles = L.tileLayer('http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',{
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
@@ -119,7 +106,7 @@ function init() {
   map.attributionControl.addAttribution('<br/>Data © <a href="http://www.bts.nsw.gov.au/">NSW Bureau of Transport Statistics</a>, <a href="http://www.abs.gov.au/">Australian Bureau Statistics</a>');
 
   //Load the boundaries
-  json = (function () {
+  var json = (function () {
     var json = null;
     $.ajax({
         'async': false,
@@ -134,70 +121,54 @@ function init() {
   })();
   
   //Display the boundaries
-  loadGeoJson(json);
+  geojsonLayer = L.geoJson(json, {
+    //style: style,
+    style: {
+      weight: 1,
+      opacity: 0.0,
+      color: '#0000ff',
+      fillOpacity: 0.3,
+      fillColor: '#0000ff'
+    },
+    onEachFeature: onEachFeature
+  }).addTo(map);
+  
+  //loadGeoJson(json);
 }
 
-
-function loadGeoJson(json) {
-  if (json != null) {
-    try {
-      geojsonLayer.clearLayers();
-    }
-    catch (err) {
-        //dummy
-    }
-
-    geojsonLayer = L.geoJson(json, {
-      style: style,
-      onEachFeature: onEachFeature
-    }).addTo(map);
-    //}).bindLabel('%', {noHide: true, direction: 'auto'}).addTo(map);
-    
-    //geojsonLayer.showLabel();
-    
-    //Show percentage labels
-    // map.eachLayer(function (layer) {
-      // try {
-        // layer.showLabel();
-      // }
-      // catch (err) {
+// function loadGeoJson(json) {
+  // if (json != null) {
+    // try {
+      // geojsonLayer.clearLayers();
+    // }
+    // catch (err) {
         // //dummy
-      // }
-    // });
-  }
-}
+    // }
 
+    // geojsonLayer = L.geoJson(json, {
+      // style: style,
+      // onEachFeature: onEachFeature
+    // }).addTo(map);
+  // }
+// }
 
 //Sets style on each GeoJSON object
 function style(feature) {
-  colVal = parseFloat(feature.properties[currStat]);
-  //colVal = parseFloat(feature.properties.d);
   
-  if (currStat == "o_" + feature.properties.id) {
-    return {
-      weight: 5,
-      opacity: 0.8,
-      color: "#333",
-      fillOpacity: 0.7,
-      fillColor: getColor(colVal)
-    };
-  } else {
-    return {
-      weight: 1,
-      opacity: 0.8,
-      color: getColor(colVal),
-      fillOpacity: 0.7,
-      fillColor: getColor(colVal)      
-    };
-  }
-}
+  colVal = parseFloat(feature.properties["o_" + currId]);
 
+  return {
+    weight: 1,
+    opacity: 0.8,
+    color: getColor(colVal),
+    fillOpacity: 0.7,
+    fillColor: getColor(colVal)      
+  };
+}
 
 //Get colour depending on value
 function getColor(d) {
-  
-  console.log(d);
-  
+
   return d > themeGrades[6] ? '#551A8B' :
          d > themeGrades[5] ? '#d73027' :
          d > themeGrades[4] ? '#fc8d59' :
@@ -207,11 +178,10 @@ function getColor(d) {
                               '#1a9850';
 }
 
-
 function onEachFeature(feature, layer) {
   
   // var xy = new L.LatLng(feature.properties.y, feature.properties.x)
-  // var theValue = feature.properties[currStat];
+  // var theValue = feature.properties["o_" + currId];
   // var percent = parseInt(100 * parseFloat(theValue) / parseFloat(currValue))
   // var percentText
 
@@ -247,71 +217,85 @@ function onEachFeature(feature, layer) {
       if (currTarget) {
           resetHighlight(currTarget); //reset previously clicked electorate
       }
-      changeTheme(e);
-      //selectedFeature(e);
+      //changeTheme(e);
+      selectedFeature(e);
       currTarget = e;
     }
   });
 }
 
+// //Change map theme when user clicks on destination
+// function changeTheme(e) {
+  // var layer = e.target;
 
-//Change map theme when user clicks on destination
-function changeTheme(e) {
+  // currId = layer.feature.properties.id;
+  // //currName = layer.feature.properties.name;
+  // //currValue = parseInt(layer.feature.properties.d_motorists);
+  
+  // //Display the boundaries
+  // loadGeoJson(json);
+
+  // info.update(layer.feature.properties);
+// };
+
+function selectedFeature(e) {
   var layer = e.target;
 
-  currStat = "o_" + layer.feature.properties.id;
-  currName = layer.feature.properties.name;
-  currValue = parseInt(layer.feature.properties.d_motorists);
-  
-  //Display the boundaries
-  loadGeoJson(json);
+  layer.setStyle({
+      weight: 5,
+      color: '#aaaaaa'
+  });
+
+  currId = layer.feature.properties.id;
+
+  for (lyr of geojsonLayer.getLayers()) {
+    lyr.setStyle(style);  
+  }
+    
+  if (!L.Browser.ie && !L.Browser.opera) {
+      layer.bringToFront();
+  }
 
   info.update(layer.feature.properties);
-};
-
-
-// function selectedFeature(e) {
-    // var layer = e.target;
-
-    // layer.setStyle({
-        // weight: 5,
-        // color: '#0000AA',
-        // fillOpacity: 0.65
-    // });
-
-    // if (!L.Browser.ie && !L.Browser.opera) {
-        // layer.bringToFront();
-    // }
-
-    // info.update(layer.feature.properties);
-
-// }
-
+}
 
 function highlightFeature(e) {
-    var layer = e.target;
+  var layer = e.target;
 
-    highlightStat = "o_" + layer.feature.properties.id;
-    var stat = currTarget.target.feature.properties[highlightStat];
-    var name = layer.feature.properties.name;
-    
-    if (currStat != highlightStat) {
-      layer.setStyle({
-        weight: 5,
-        color: '#666',
-        fillOpacity: 0.65
-      });
+  highlightedId = layer.feature.properties.id;
+  
+  if (currId != highlightedId) {
+    layer.setStyle({
+      weight: 3,
+      opacity: 0.8,
+      color: '#0000ff'
+    });
 
-      if (!L.Browser.ie && !L.Browser.opera) {
-        layer.bringToFront();
+    if (!L.Browser.ie && !L.Browser.opera) {
+      layer.bringToFront();
+
+      if(currTarget) {
+        currTarget.target.bringToFront();
       }
     }
-    
-  info2.update(name, stat);
+  }
+  
+  if (currTarget) {
+    var stat = currTarget.target.feature.properties["o_" + highlightedId];
+    var name = layer.feature.properties.name;
+    info2.update(name, stat);
+  }
 }
 
 
 function resetHighlight(e) {
-  geojsonLayer.resetStyle(e.target);
+  var layer = e.target;
+
+  highlightedId = layer.feature.properties.id;
+  
+  if (currId != highlightedId) {
+    geojsonLayer.resetStyle(e.target);
+  }
+  
   info2.update();
 }
