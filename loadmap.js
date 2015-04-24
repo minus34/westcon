@@ -5,7 +5,7 @@ var legend;
 var json;
 var geojsonLayer;
 var startZoom = 10;
-var currTarget;
+var currLayer;
 var currId;
 
 //var currId = 11703;
@@ -136,18 +136,11 @@ function loadGeoJson(json) {
     // Map as blue polygons is no theme selected
     if (currId) {
       geojsonLayer.clearLayers();
-
       geojsonLayer = L.geoJson(json, {
         style: style,
         onEachFeature: onEachFeature
       }).addTo(map);
-      
-      //currTarget = geojsonLayer.getLayer(currId);
-      
-      //console.log(currTarget);
-      
     } else {
-
       geojsonLayer = L.geoJson(json, {
         //style: style,
         style: {
@@ -169,10 +162,6 @@ function style(feature) {
   colVal = parseFloat(feature.properties["o_" + currId]);
   
   if (feature.properties.id == currId) {
-    
-    
-    
-    
     return {
       weight: 5,
       opacity: 0.8,
@@ -239,74 +228,42 @@ function onEachFeature(feature, layer) {
     mouseover: highlightFeature,
     mouseout: resetHighlight,
     click: function (e) {
-      
-      var clickedFeature = e.target.feature;
-      
-      //console.log(clickedFeature.properties.id);
-      
-      if (clickedFeature.properties.id != currId) {
-          resetHighlight(currTarget); //reset previously clicked electorate
+      if (currLayer) {
+          resetSelection(); //reset previously clicked electorate
       }
-      //changeTheme(e);
       selectedFeature(e);
-      //currTarget = e;
     }
   });
 }
 
-// //Change map theme when user clicks on destination
-// function changeTheme(e) {
-  // var layer = e.target;
-
-  // currId = layer.feature.properties.id;
-  // //currName = layer.feature.properties.name;
-  // //currValue = parseInt(layer.feature.properties.d_motorists);
-  
-  // //Display the boundaries
-  // loadGeoJson(json);
-
-  // info.update(layer.feature.properties);
-// };
-
 function selectedFeature(e) {
-  var layer = e.target;
-
-  layer.setStyle({
-      weight: 5,
-      color: '#aaaaaa'
-  });
-
-  currId = layer.feature.properties.id;
-  //currTarget = undefined; //need to reset this as it doesn't exist after bdys are reloaded
-    
+  currId = e.target.feature.properties.id;
+  //currLayer = undefined; //need to reset this as it doesn't exist after bdys are reloaded
+  
   //Refresh the boundaries with the new colours
   loadGeoJson(json);
   
-  // //Doesn't work
-  // for (lyr of geojsonLayer.getLayers()) {
-    // lyr.setStyle(style);  
-  // }
-
   for (layer of geojsonLayer.getLayers()) {
+    //Style current selection
     if (layer.feature.properties.id == currId){
-      currTarget = layer;
+      currLayer = layer;
 
+      currLayer.setStyle({
+        weight: 5,
+        color: '#aaaaaa'
+      });
+      
       if (!L.Browser.ie && !L.Browser.opera) {
-          layer.bringToFront();
+          currLayer.bringToFront();
       }
     }      
   }
-  
-  // if (!L.Browser.ie && !L.Browser.opera) {
-      // layer.bringToFront();
-  // }
 
-  info.update(layer.feature.properties);
+  info.update(currLayer.feature.properties);
 }
 
 function highlightFeature(e) {
   var layer = e.target;
-
   highlightedId = layer.feature.properties.id;
   
   if (currId != highlightedId) {
@@ -319,32 +276,27 @@ function highlightFeature(e) {
     if (!L.Browser.ie && !L.Browser.opera) {
       layer.bringToFront();
 
-      // if(currTarget) {
-        // currTarget.target.bringToFront();
-      // }
+      if(currLayer) {
+        currLayer.bringToFront();
+      }
     }
   }
   
-  // var currTarget = geojsonLayer.filter(function( layer ) {
-    // return layer.feature.properties.id == currId;
-  // });
-  
-  if (currTarget) {
-    var stat = currTarget.target.feature.properties["o_" + highlightedId];
+  if (currLayer) {
+    var stat = currLayer.feature.properties["o_" + highlightedId];
     var name = layer.feature.properties.name;
     info2.update(name, stat);
   }
 }
 
+function resetSelection() {
+  geojsonLayer.resetStyle(currLayer);
+  
+  info2.update();
+}
 
 function resetHighlight(e) {
-  var layer = e.target;
-
-  highlightedId = layer.feature.properties.id;
-  
-  if (currId != highlightedId) {
-    geojsonLayer.resetStyle(e.target);
-  }
+  geojsonLayer.resetStyle(e.target);
   
   info2.update();
 }
