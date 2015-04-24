@@ -126,24 +126,28 @@ function init() {
 
 function loadGeoJson(json) {
   if (json != null) {
-    try {
-      geojsonLayer.clearLayers();
-    }
-    catch (err) {
-        //dummy
-    }
-    
+    // try {
+      // geojsonLayer.clearLayers();
+    // }
+    // catch (err) {
+        // //dummy
+    // }
+
+    // Map as blue polygons is no theme selected
     if (currId) {
+      geojsonLayer.clearLayers();
+
       geojsonLayer = L.geoJson(json, {
         style: style,
         onEachFeature: onEachFeature
       }).addTo(map);
       
-      currTarget = geojsonLayer.getLayer(currId);
+      //currTarget = geojsonLayer.getLayer(currId);
       
-      console.log(currTarget);
+      //console.log(currTarget);
       
     } else {
+
       geojsonLayer = L.geoJson(json, {
         //style: style,
         style: {
@@ -164,13 +168,27 @@ function style(feature) {
   
   colVal = parseFloat(feature.properties["o_" + currId]);
   
-  return {
-    weight: 1,
-    opacity: 0.8,
-    color: getColor(colVal),
-    fillOpacity: 0.7,
-    fillColor: getColor(colVal)      
-  };
+  if (feature.properties.id == currId) {
+    
+    
+    
+    
+    return {
+      weight: 5,
+      opacity: 0.8,
+      color: '#aaaaaa',
+      fillOpacity: 0.7,
+      fillColor: getColor(colVal)      
+    };
+  } else {
+    return {
+      weight: 1,
+      opacity: 0.8,
+      color: getColor(colVal),
+      fillOpacity: 0.7,
+      fillColor: getColor(colVal)      
+    };
+  }
 }
 
 //Get colour depending on value
@@ -221,12 +239,17 @@ function onEachFeature(feature, layer) {
     mouseover: highlightFeature,
     mouseout: resetHighlight,
     click: function (e) {
-      if (currTarget) {
+      
+      var clickedFeature = e.target.feature;
+      
+      //console.log(clickedFeature.properties.id);
+      
+      if (clickedFeature.properties.id != currId) {
           resetHighlight(currTarget); //reset previously clicked electorate
       }
       //changeTheme(e);
       selectedFeature(e);
-      currTarget = e;
+      //currTarget = e;
     }
   });
 }
@@ -254,7 +277,7 @@ function selectedFeature(e) {
   });
 
   currId = layer.feature.properties.id;
-  currTarget = undefined; //need to reset this as it doesn't exist after bdys are reloaded
+  //currTarget = undefined; //need to reset this as it doesn't exist after bdys are reloaded
     
   //Refresh the boundaries with the new colours
   loadGeoJson(json);
@@ -263,10 +286,20 @@ function selectedFeature(e) {
   // for (lyr of geojsonLayer.getLayers()) {
     // lyr.setStyle(style);  
   // }
-    
-  if (!L.Browser.ie && !L.Browser.opera) {
-      layer.bringToFront();
+
+  for (layer of geojsonLayer.getLayers()) {
+    if (layer.feature.properties.id == currId){
+      currTarget = layer;
+
+      if (!L.Browser.ie && !L.Browser.opera) {
+          layer.bringToFront();
+      }
+    }      
   }
+  
+  // if (!L.Browser.ie && !L.Browser.opera) {
+      // layer.bringToFront();
+  // }
 
   info.update(layer.feature.properties);
 }
@@ -286,11 +319,15 @@ function highlightFeature(e) {
     if (!L.Browser.ie && !L.Browser.opera) {
       layer.bringToFront();
 
-      if(currTarget) {
-        currTarget.target.bringToFront();
-      }
+      // if(currTarget) {
+        // currTarget.target.bringToFront();
+      // }
     }
   }
+  
+  // var currTarget = geojsonLayer.filter(function( layer ) {
+    // return layer.feature.properties.id == currId;
+  // });
   
   if (currTarget) {
     var stat = currTarget.target.feature.properties["o_" + highlightedId];
