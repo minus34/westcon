@@ -162,3 +162,30 @@ DELETE FROM westcon.sa3_2011_sydney_motorists
 --select * from westcon.sa3_2011_sydney_motorists where d_sa3_code = 11501 order by o_sa3_code;
 
 
+
+--------------------------------------
+-- testing
+--------------------------------------
+
+-- 
+-- SELECT * FROM westcon.sa3_2011_sydney_bts
+--   WHERE sa3_code = 11703
+--  ;
+-- 
+-- 
+-- 
+-- SELECT o_sa3_11,
+--        d_sa3_11,
+--        SUM(employed_persons)::integer AS motorists
+--   FROM westcon.jtw_table2011eh07
+--   WHERE mode10 IN (4, 5)
+--   and o_sa3_11 = 11703
+--   and d_sa3_11 = 12403
+--   group by o_sa3_11,
+--            d_sa3_11;
+-- 
+
+
+
+
+

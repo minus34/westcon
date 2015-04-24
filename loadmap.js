@@ -72,11 +72,12 @@ function init() {
 
     return div;
   };
-  
   legend.addTo(map);
   
   var tiles = L.tileLayer('http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',{
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+    minZoom: 10,
+    maxZoom: 12
   }).addTo(map);
   
   //Change the start zoom and font size based on window size
@@ -159,13 +160,17 @@ function loadGeoJson(json) {
 //Sets style on each GeoJSON object
 function style(feature) {
   
-  colVal = parseFloat(feature.properties["o_" + currId]);
+  colVal = parseFloat(currLayer.feature.properties["o_" + feature.properties.id]);
+  
+  // if (feature.properties.id == 12403) {
+    // console.log(currLayer);
+  // }
   
   if (feature.properties.id == currId) {
     return {
-      weight: 5,
+      weight: 4,
       opacity: 0.8,
-      color: '#aaaaaa',
+      color: '#ffff00',
       fillOpacity: 0.7,
       fillColor: getColor(colVal)      
     };
@@ -248,10 +253,10 @@ function selectedFeature(e) {
     if (layer.feature.properties.id == currId){
       currLayer = layer;
 
-      currLayer.setStyle({
-        weight: 5,
-        color: '#aaaaaa'
-      });
+      // currLayer.setStyle({
+        // weight: 5,
+        // color: '#ffff00'
+      // });
       
       if (!L.Browser.ie && !L.Browser.opera) {
           currLayer.bringToFront();
@@ -285,6 +290,9 @@ function highlightFeature(e) {
   if (currLayer) {
     var stat = currLayer.feature.properties["o_" + highlightedId];
     var name = layer.feature.properties.name;
+    
+    console.log(name + ' - ' + stat);
+    
     info2.update(name, stat);
   }
 }

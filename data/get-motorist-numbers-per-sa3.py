@@ -49,8 +49,8 @@ for bdy_id in bdy_ids:
     sql = "UPDATE westcon.sa3_2011_sydney_bts AS bdy " \
         "SET o_%s = jtw.motorists " \
         "FROM westcon.sa3_2011_sydney_motorists AS jtw " \
-        "WHERE jtw.o_sa3_code = bdy.sa3_code " \
-        "AND jtw.d_sa3_code = %s"
+        "WHERE jtw.d_sa3_code = bdy.sa3_code " \
+        "AND jtw.o_sa3_code = %s"
 
     # "SELECT otz.o_sa3_11, SUM(jtw.employed_persons)::integer AS motorists FROM westcon.tz_nsw_2011_pnt as dtz " \
     # "INNER JOIN westcon.jtw_table2011eh07 as jtw ON jtw.d_tz11 = dtz.tz_code11 " \
@@ -67,7 +67,7 @@ for bdy_id in bdy_ids:
     cur.execute(sql % (bdy_id, bdy_id))
 
     # get counts for qa
-    cur.execute("select d_motorists from westcon.sa3_2011_sydney_bts WHERE sa3_code = %s;" % (bdy_id,))
+    cur.execute("select o_motorists from westcon.sa3_2011_sydney_bts WHERE sa3_code = %s;" % (bdy_id,))
     destcount = cur.fetchone()[0]
 
     cur.execute("SELECT sum(o_%s) as motorists FROM westcon.sa3_2011_sydney_bts;" % (bdy_id,))
