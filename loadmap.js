@@ -27,7 +27,7 @@ function init() {
     };
 
     info.update = function (props) {
-        this.div.innerHTML = (props ? '<b>' + parseInt(props.d_motorists).toLocaleString() + ' </b> motorists drive to <b>' + props.name + '</b> for work' : 'Click/tap on an area of Sydney');
+        this.div.innerHTML = (props ? 'In 2011, <b>' + parseInt(props.d_motorists).toLocaleString() + ' </b> motorists drove to <b>' + props.name + '</b> for work' : 'Click/tap on an area of Sydney');
     };
 
     info.addTo(map);
@@ -42,7 +42,7 @@ function init() {
     };
 
     info2.update = function (name, stat) {
-        this.div.innerHTML = (name ? '<b>' + stat.toLocaleString() + ' </b> drive from <b>' + name + '</b>'
+        this.div.innerHTML = (name ? '<b>' + stat.toLocaleString() + ' </b> drove from <b>' + name + '</b>'
             : '');
     };
 
