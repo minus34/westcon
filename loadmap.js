@@ -155,7 +155,7 @@ function style(feature) {
           weight: 4,
           opacity: 0.8,
           color: '#ffff00',
-          fillOpacity: 0.7,
+          fillOpacity: 0.5,
           fillColor: getColor(colVal)      
       };
     } else {
@@ -163,7 +163,7 @@ function style(feature) {
           weight: 1,
           opacity: 0.8,
           color: getColor(colVal),
-          fillOpacity: 0.7,
+          fillOpacity: 0.5,
           fillColor: getColor(colVal)      
       };
     }
@@ -254,7 +254,7 @@ function highlightFeature(e) {
     if (currId != highlightedId) {
         layer.setStyle({
             weight: 3,
-            opacity: 0.8,
+            opacity: 0.6,
             color: '#0000ff'
         });
 
