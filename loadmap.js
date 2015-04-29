@@ -1,6 +1,4 @@
-﻿"use strict";
-
-var map;
+﻿var map;
 var info;
 var info2;
 var legend;
@@ -73,7 +71,7 @@ function init() {
     
     var tiles = L.tileLayer('http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',{
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
-        minZoom: 10,
+        minZoom: 9,
         maxZoom: 12
     }).addTo(map);
     
