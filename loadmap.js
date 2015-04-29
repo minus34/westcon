@@ -83,17 +83,17 @@ function init() {
     if (windowWidth > windowHeight) width = windowWidth;
     else width = windowHeight;
 
-    if (width > 2000) {
-        startZoom += 1;
-        $('.info').css({ 'font': 'normal normal normal 16px/22px Arial, Helvetica, sans-serif', 'line-height': '22px' });
-        $('.legend').css({ 'font': 'normal normal normal 16px/22px Arial, Helvetica, sans-serif', 'line-height': '22px' });
-        $('.dropdown').css({ 'line-height': '22px' });
-    }
-    else if (width < 1200) {
-        $('.info').css({ 'font': 'normal normal normal 12px/16px Arial, Helvetica, sans-serif', 'line-height': '18px' });
-        $('.legend').css({ 'font': 'normal normal normal 12px/16px Arial, Helvetica, sans-serif', 'line-height': '18px' });
-        $('.dropdown').css({ 'line-height': '18px' });
-    }
+    // if (width > 2000) {
+        // startZoom += 1;
+        // $('.info').css({ 'font': 'normal normal normal 16px/22px Arial, Helvetica, sans-serif', 'line-height': '22px' });
+        // $('.legend').css({ 'font': 'normal normal normal 16px/22px Arial, Helvetica, sans-serif', 'line-height': '22px' });
+        // $('.dropdown').css({ 'line-height': '22px' });
+    // }
+    // else if (width < 1200) {
+        // $('.info').css({ 'font': 'normal normal normal 12px/16px Arial, Helvetica, sans-serif', 'line-height': '18px' });
+        // $('.legend').css({ 'font': 'normal normal normal 12px/16px Arial, Helvetica, sans-serif', 'line-height': '18px' });
+        // $('.dropdown').css({ 'line-height': '18px' });
+    // }
 
     //Set the view to a given centre and zoom
     map.setView(new L.LatLng(-33.85, 151.15), startZoom);
